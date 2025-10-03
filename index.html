@@ -3,262 +3,486 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Hoạt động Hàng ngày</title>
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <title>Quản Lý Hoạt Động</title>
     <style>
+        /* --- General Styles & Variables --- */
         :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --accent-color: #e74c3c;
-            --light-color: #ecf0f1;
-            --success-color: #27ae60;
+            --primary-color: #0d6efd;
+            --success-color: #198754;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-gray: #f8f9fa;
+            --border-color: #dee2e6;
+            --dark-text: #212529;
+            --light-text: #fff;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            --border-radius: 0.375rem;
         }
-        * {margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;}
-        body {background:#f5f7fa;color:#333;line-height:1.6;}
-        .container {max-width:1200px;margin:0 auto;padding:20px;}
-        header {text-align:center;margin-bottom:30px;padding:20px;background:linear-gradient(135deg,var(--primary-color),var(--secondary-color));color:white;border-radius:10px;box-shadow:0 4px 6px rgba(0,0,0,0.1);}
-        h1 {font-size:2.2rem;margin-bottom:10px;}
-        .tabs {display:flex;background:white;border-radius:10px 10px 0 0;overflow:hidden;box-shadow:0 2px 5px rgba(0,0,0,0.1);}
-        .tab {flex:1;padding:15px;text-align:center;cursor:pointer;transition:all 0.3s;font-weight:600;border-bottom:3px solid transparent;}
-        .tab:hover {background:#f8f9fa;}
-        .tab.active {border-bottom:3px solid var(--secondary-color);color:var(--secondary-color);background:#f8f9fa;}
-        .tab-content {display:none;background:white;padding:25px;border-radius:0 0 10px 10px;box-shadow:0 2px 5px rgba(0,0,0,0.1);margin-bottom:30px;}
-        .tab-content.active {display:block;animation:fadeIn 0.5s;}
-        @keyframes fadeIn {from{opacity:0;}to{opacity:1;}}
-        .form-group {margin-bottom:20px;}
-        label {display:block;margin-bottom:8px;font-weight:600;color:var(--primary-color);}
-        input[type="date"], textarea {width:100%;padding:12px;border:1px solid #ddd;border-radius:5px;font-size:16px;}
-        textarea {min-height:150px;resize:vertical;}
-        .button-group {display:flex;gap:15px;margin-top:25px;}
-        button {padding:12px 25px;border:none;border-radius:5px;cursor:pointer;font-size:16px;font-weight:600;transition:0.3s;display:flex;align-items:center;gap:8px;}
-        .save-btn {background:var(--success-color);color:white;}
-        .save-btn:hover {background:#219653;transform:translateY(-2px);}
-        .edit-btn {background:var(--secondary-color);color:white;}
-        .edit-btn:hover {background:#2980b9;transform:translateY(-2px);}
-        .cancel-btn {background:#95a5a6;color:white;}
-        .cancel-btn:hover {background:#7f8c8d;transform:translateY(-2px);}
-        .activities-list {margin-top:30px;border-top:1px solid #eee;padding-top:20px;}
-        .activity-item {background:#f8f9fa;padding:15px;margin-bottom:15px;border-radius:5px;border-left:4px solid var(--secondary-color);}
-        .activity-date {font-weight:600;color:var(--primary-color);margin-bottom:5px;}
-        .activity-content {color:#555;white-space:pre-wrap;}
-        .activity-actions {margin-top:10px;display:flex;gap:10px;}
-        .delete-btn {background:var(--accent-color);color:white;padding:5px 10px;font-size:14px;}
-        .delete-btn:hover {background:#c0392b;}
-        .empty-state {text-align:center;padding:30px;color:#7f8c8d;}
-        .firebase-status {position:fixed;bottom:20px;right:20px;padding:10px 15px;border-radius:5px;font-size:14px;display:flex;align-items:center;gap:8px;}
-        .status-connected {background:var(--success-color);color:white;}
-        .status-disconnected {background:var(--accent-color);color:white;}
-        @media (max-width:768px){.tabs{flex-direction:column;}.button-group{flex-direction:column;}button{width:100%;}}
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--light-gray);
+            margin: 0;
+            padding: 15px;
+            color: var(--dark-text);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: var(--light-text);
+            padding: 25px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--dark-text);
+            font-weight: 600;
+            margin-bottom: 30px;
+        }
+        
+        /* --- Tab Navigation --- */
+        .tab-nav {
+            display: flex;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+
+        .tab-link {
+            padding: 12px 18px;
+            cursor: pointer;
+            border: 0;
+            border-bottom: 3px solid transparent;
+            background-color: transparent;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6c757d;
+            transition: color 0.2s ease, border-color 0.2s ease;
+            margin-bottom: -1px;
+        }
+
+        .tab-link.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* --- Form & Inputs --- */
+        .form-container {
+            background: #fff;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border-color);
+            margin-bottom: 25px;
+        }
+        
+        .form-group { margin-bottom: 1.25rem; }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            box-sizing: border-box;
+            font-size: 1rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(13, 110, 253, 0.25);
+        }
+
+        /* --- Buttons --- */
+        .btn {
+            padding: 0.6rem 1.2rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        
+        .btn-save { background-color: var(--primary-color); color: var(--light-text); }
+        .btn-update { background-color: var(--warning-color); color: var(--dark-text); }
+        .btn-edit, .btn-delete {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: #6c757d;
+            padding: 5px 10px;
+        }
+        .btn-edit:hover { background-color: var(--warning-color); color: var(--dark-text); border-color: var(--warning-color); }
+        .btn-delete:hover { background-color: var(--danger-color); color: var(--light-text); border-color: var(--danger-color); }
+        
+        .btn-export { background-color: var(--success-color); color: var(--light-text); width: 100%; }
+        .action-buttons { display: flex; gap: 8px; justify-content: center; }
+
+        /* --- Aesthetically Pleasing Table --- */
+        .table-wrapper { overflow-x: auto; }
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            font-size: 0.95rem;
+            text-align: left;
+        }
+        .data-table thead tr {
+            background-color: var(--light-gray);
+            color: var(--dark-text);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        .data-table th, .data-table td {
+            padding: 15px 18px;
+        }
+        .data-table tbody tr {
+            border-bottom: 1px solid var(--border-color);
+        }
+        .data-table tbody tr:last-of-type {
+            border-bottom: 2px solid var(--primary-color);
+        }
+        .data-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .data-table td:first-child { min-width: 120px; }
+        .data-table td:nth-child(2) { min-width: 300px; white-space: normal; }
+        /* NEW: Align content to the left in summary table */
+        #summary-table td:nth-child(3) { white-space: normal; text-align: left; }
+        .data-table td:last-child { min-width: 140px; text-align: center; }
+        
+        /* --- Responsive Design --- */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 15px; }
+            h1 { font-size: 1.5rem; }
+            .tab-link { padding: 10px 12px; font-size: 0.9rem; }
+            .btn { width: 100%; margin-top: 10px; }
+            .filter-controls { grid-template-columns: 1fr; }
+            .action-buttons { flex-direction: column; }
+            .data-table th, .data-table td { padding: 12px 10px; font-size: 0.9rem; }
+        }
+        .filter-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            align-items: flex-end; /* Align items to the bottom */
+        }
     </style>
 </head>
 <body>
-<div class="container">
-    <header>
-        <h1>Quản lý Hoạt động Hàng ngày</h1>
-        <p>Ghi chép và lưu trữ các hoạt động</p>
-    </header>
 
-    <div class="tabs">
-        <div class="tab active" data-tab="mttq">MTTQ</div>
-        <div class="tab" data-tab="doan">Đoàn thanh niên</div>
-        <div class="tab" data-tab="phunu">Hội phụ nữ</div>
-        <div class="tab" data-tab="nguoicaotuoi">Cựu chiến binh</div>
+    <div class="container">
+        <h1>📝 Quản Lý Hoạt Động Hàng Ngày</h1>
+        
+        <div class="tab-nav">
+            <button class="tab-link active" data-tab="mat-tran-to-quoc">Mặt trận tổ quốc</button>
+            <button class="tab-link" data-tab="doan-thanh-nien">Đoàn thanh niên</button>
+            <button class="tab-link" data-tab="phu-nu">Phụ nữ</button>
+            <button class="tab-link" data-tab="cuu-chien-binh">Cựu chiến binh</button>
+            <button class="tab-link" data-tab="tong-hop">🔍 Tổng hợp</button>
+        </div>
+
+        <div id="mat-tran-to-quoc" class="tab-content active"></div>
+        <div id="doan-thanh-nien" class="tab-content"></div>
+        <div id="phu-nu" class="tab-content"></div>
+        <div id="cuu-chien-binh" class="tab-content"></div>
+
+        <div id="tong-hop" class="tab-content">
+             <div class="form-container">
+                <div class="filter-controls">
+                    <div class="form-group">
+                        <label for="search-unit">Đơn vị</label>
+                        <select id="search-unit">
+                            <option value="all">Tất cả đơn vị</option>
+                            <option value="mat-tran-to-quoc">Mặt trận tổ quốc</option>
+                            <option value="doan-thanh-nien">Đoàn thanh niên</option>
+                            <option value="phu-nu">Phụ nữ</option>
+                            <option value="cuu-chien-binh">Cựu chiến binh</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="start-date">Từ ngày</label>
+                        <input type="date" id="start-date">
+                    </div>
+                     <div class="form-group">
+                        <label for="end-date">Đến ngày</label>
+                        <input type="date" id="end-date">
+                    </div>
+                    <div class="form-group">
+                         <label>&nbsp;</label> <button class="btn btn-export" onclick="exportToExcel()">Xuất Excel</button>
+                    </div>
+                </div>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table" id="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Đơn vị</th>
+                            <th>Ngày, tháng</th>
+                            <th>Nội dung hoạt động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td colspan="3" style="text-align:center; padding: 40px;">Chọn bộ lọc để xem dữ liệu.</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 
-    <!-- Tab MTTQ -->
-    <div class="tab-content active" id="mttq-tab">
-        <h2>Mặt trận Tổ quốc</h2>
-        <div class="form-group">
-            <label for="mttq-date">Ngày tháng:</label>
-            <input type="date" id="mttq-date">
-        </div>
-        <div class="form-group">
-            <label for="mttq-text">Nội dung hoạt động:</label>
-            <textarea id="mttq-text"></textarea>
-        </div>
-        <div class="button-group">
-            <button class="save-btn" id="mttq-save">💾 Lưu</button>
-            <button class="edit-btn" id="mttq-edit" style="display:none;">✏️ Cập nhật</button>
-            <button class="cancel-btn" id="mttq-cancel" style="display:none;">❌ Hủy</button>
-        </div>
-        <div class="activities-list" id="mttq-activities"></div>
-    </div>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
 
-    <!-- Tab Đoàn -->
-    <div class="tab-content" id="doan-tab">
-        <h2>Đoàn thanh niên</h2>
-        <div class="form-group">
-            <label for="doan-date">Ngày tháng:</label>
-            <input type="date" id="doan-date">
-        </div>
-        <div class="form-group">
-            <label for="doan-text">Nội dung hoạt động:</label>
-            <textarea id="doan-text"></textarea>
-        </div>
-        <div class="button-group">
-            <button class="save-btn" id="doan-save">💾 Lưu</button>
-            <button class="edit-btn" id="doan-edit" style="display:none;">✏️ Cập nhật</button>
-            <button class="cancel-btn" id="doan-cancel" style="display:none;">❌ Hủy</button>
-        </div>
-        <div class="activities-list" id="doan-activities"></div>
-    </div>
+    <script>
+        // --- CẤU HÌNH & KHỞI TẠO ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCW3tCZI2GHbEsk5Vgq0KGDCi2KyQHzEnk",
+            authDomain: "hoat-dong-hang-ngay.firebaseapp.com",
+            databaseURL: "https://hoat-dong-hang-ngay-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "hoat-dong-hang-ngay",
+            storageBucket: "hoat-dong-hang-ngay.firebasestorage.app",
+            messagingSenderId: "138829112865",
+            appId: "1:138829112865:web:f9861d3990c5877516e560"
+        };
 
-    <!-- Tab Phụ nữ -->
-    <div class="tab-content" id="phunu-tab">
-        <h2>Hội phụ nữ</h2>
-        <div class="form-group">
-            <label for="phunu-date">Ngày tháng:</label>
-            <input type="date" id="phunu-date">
-        </div>
-        <div class="form-group">
-            <label for="phunu-text">Nội dung hoạt động:</label>
-            <textarea id="phunu-text"></textarea>
-        </div>
-        <div class="button-group">
-            <button class="save-btn" id="phunu-save">💾 Lưu</button>
-            <button class="edit-btn" id="phunu-edit" style="display:none;">✏️ Cập nhật</button>
-            <button class="cancel-btn" id="phunu-cancel" style="display:none;">❌ Hủy</button>
-        </div>
-        <div class="activities-list" id="phunu-activities"></div>
-    </div>
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const ADMIN_PASSWORD = "admin";
+        const TABS = ['mat-tran-to-quoc', 'doan-thanh-nien', 'phu-nu', 'cuu-chien-binh'];
+        const UNIT_NAMES = {
+            'mat-tran-to-quoc': 'Mặt trận tổ quốc',
+            'doan-thanh-nien': 'Đoàn thanh niên',
+            'phu-nu': 'Phụ nữ',
+            'cuu-chien-binh': 'Cựu chiến binh'
+        };
+        let filteredDataForExport = [];
 
-    <!-- Tab CCB -->
-    <div class="tab-content" id="nguoicaotuoi-tab">
-        <h2>Hội Cựu chiến binh</h2>
-        <div class="form-group">
-            <label for="nguoicaotuoi-date">Ngày tháng:</label>
-            <input type="date" id="nguoicaotuoi-date">
-        </div>
-        <div class="form-group">
-            <label for="nguoicaotuoi-text">Nội dung hoạt động:</label>
-            <textarea id="nguoicaotuoi-text"></textarea>
-        </div>
-        <div class="button-group">
-            <button class="save-btn" id="nguoicaotuoi-save">💾 Lưu</button>
-            <button class="edit-btn" id="nguoicaotuoi-edit" style="display:none;">✏️ Cập nhật</button>
-            <button class="cancel-btn" id="nguoicaotuoi-cancel" style="display:none;">❌ Hủy</button>
-        </div>
-        <div class="activities-list" id="nguoicaotuoi-activities"></div>
-    </div>
+        // --- HÀM TẠO GIAO DIỆN ---
+        function createTabContent(tabId) {
+            return `
+                <div class="form-container">
+                    <input type="hidden" id="editKey-${tabId}">
+                    <div class="form-group">
+                        <label for="date-${tabId}">Ngày, tháng</label>
+                        <input type="date" id="date-${tabId}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="content-${tabId}">Nội dung hoạt động</label>
+                        <textarea id="content-${tabId}" rows="4" required></textarea>
+                    </div>
+                    <button class="btn btn-save" id="saveBtn-${tabId}" onclick="saveData('${tabId}')">Lưu Hoạt Động</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table" id="dataTable-${tabId}">
+                        <thead><tr><th>Ngày, tháng</th><th>Nội dung hoạt động</th><th>Hành động</th></tr></thead>
+                        <tbody></tbody>
+                    </table>
+                </div>`;
+        }
+        
+        // --- LOGIC XỬ LÝ TAB ---
+        document.querySelector('.tab-nav').addEventListener('click', (event) => {
+            if (event.target.classList.contains('tab-link')) {
+                const tabId = event.target.dataset.tab;
+                document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+                document.querySelectorAll('.tab-link').forEach(tl => tl.classList.remove('active'));
+                document.getElementById(tabId).classList.add('active');
+                event.target.classList.add('active');
+            }
+        });
+        
+        // --- HÀM CRUD FIREBASE ---
+        function saveData(tabId) {
+            const dateInput = document.getElementById(`date-${tabId}`);
+            const contentInput = document.getElementById(`content-${tabId}`);
+            const editKeyInput = document.getElementById(`editKey-${tabId}`);
+            if (!dateInput.value || !contentInput.value) return alert("Vui lòng nhập đủ thông tin.");
+            
+            const data = { date: dateInput.value, content: contentInput.value };
+            const key = editKeyInput.value;
 
-    <div class="firebase-status" id="firebase-status">
-        <span id="status-icon">🔴</span>
-        <span id="status-text">Đang kết nối...</span>
-    </div>
-</div>
+            const dbRef = key ? database.ref(`${tabId}/${key}`) : database.ref(tabId).push();
+            const action = key ? 'update' : 'set';
+            
+            dbRef[action](data)
+                .then(() => { alert(key ? "Cập nhật thành công!" : "Lưu thành công!"); resetForm(tabId); })
+                .catch(error => console.error("Error:", error));
+        }
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyCW3tCZI2GHbEsk5Vgq0KGDCi2KyQHzEnk",
-  authDomain: "hoat-dong-hang-ngay.firebaseapp.com",
-  databaseURL: "https://hoat-dong-hang-ngay-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "hoat-dong-hang-ngay",
-  storageBucket: "hoat-dong-hang-ngay.appspot.com",
-  messagingSenderId: "138829112865",
-  appId: "1:138829112865:web:f9861d3990c5877516e560"
-};
+        function loadData(tabId) {
+            const tableBody = document.querySelector(`#dataTable-${tabId} tbody`);
+            const dataRef = database.ref(tabId).orderByChild('date').limitToLast(100); 
 
-let database;
-try {
-    firebase.initializeApp(firebaseConfig);
-    database = firebase.database();
-    console.log("Firebase connected");
-} catch (e) {alert("Lỗi Firebase: "+e.message);}
+            dataRef.on('child_added', s => renderRow(tableBody, 'prepend', tabId, s.key, s.val()));
+            dataRef.on('child_changed', s => renderRow(tableBody, 'update', tabId, s.key, s.val()));
+            dataRef.on('child_removed', s => {
+                const row = tableBody.querySelector(`tr[data-key="${s.key}"]`);
+                if (row) row.remove();
+            });
+        }
+        
+        function renderRow(tableBody, mode, tabId, key, data) {
+            let row;
+            if (mode === 'update' || mode === 'replace') {
+                row = tableBody.querySelector(`tr[data-key="${key}"]`);
+                if (!row) return;
+            } else {
+                row = document.createElement('tr');
+                row.dataset.key = key;
+            }
+            
+            row.innerHTML = `
+                <td>${formatDate(data.date)}</td>
+                <td>${data.content.replace(/\n/g, '<br>')}</td>
+                <td><div class="action-buttons">
+                    <button class="btn btn-edit" onclick="editData('${tabId}', '${key}')">Sửa</button>
+                    <button class="btn btn-delete" onclick="deleteData('${tabId}', '${key}')">Xoá</button>
+                </div></td>`;
+            
+            if (mode === 'prepend') tableBody.prepend(row);
+        }
 
-// Tab switching
-document.querySelectorAll('.tab').forEach(tab=>{
-  tab.addEventListener('click',()=>{
-    document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
-    document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
-    tab.classList.add('active');
-    const tabId=tab.getAttribute('data-tab');
-    document.getElementById(`${tabId}-tab`).classList.add('active');
-    loadActivities(tabId);
-  });
-});
+        function editData(tabId, key) {
+            database.ref(`${tabId}/${key}`).once('value', snapshot => {
+                const data = snapshot.val();
+                if (data) {
+                    document.getElementById(`date-${tabId}`).value = data.date;
+                    document.getElementById(`content-${tabId}`).value = data.content;
+                    document.getElementById(`editKey-${tabId}`).value = key;
+                    const saveBtn = document.getElementById(`saveBtn-${tabId}`);
+                    saveBtn.textContent = "Cập Nhật";
+                    saveBtn.className = 'btn btn-update';
+                    window.scrollTo(0, 0);
+                }
+            });
+        }
 
-// Utils
-function formatDate(d){if(!d)return'';return new Date(d).toLocaleDateString('vi-VN');}
+        function deleteData(tabId, key) {
+            const password = prompt("Chức năng Admin. Vui lòng nhập mật khẩu:");
+            if (password === ADMIN_PASSWORD) {
+                if (confirm("Bạn chắc chắn muốn xoá hoạt động này?")) {
+                    database.ref(`${tabId}/${key}`).remove().then(() => alert("Xoá thành công!"));
+                }
+            } else if (password !== null) {
+                alert("Mật khẩu không chính xác!");
+            }
+        }
+        
+        // --- LOGIC TAB TỔNG HỢP ---
+        async function searchActivities() {
+            const unit = document.getElementById('search-unit').value;
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+            const tableBody = document.querySelector('#summary-table tbody');
+            
+            tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 40px;">Đang tải...</td></tr>`;
 
-// Load data
-function loadActivities(org){
-  const list=document.getElementById(`${org}-activities`);
-  list.innerHTML="<p>Đang tải...</p>";
-  database.ref(`activities/${org}`).orderByChild('timestamp').once('value').then(snap=>{
-    if(!snap.exists()){list.innerHTML="<p>Chưa có hoạt động</p>";return;}
-    list.innerHTML="";
-    let arr=[];snap.forEach(c=>arr.push({id:c.key,...c.val()}));
-    arr.sort((a,b)=>b.timestamp-a.timestamp);
-    arr.forEach(act=>{
-      const div=document.createElement('div');
-      div.className="activity-item";
-      div.innerHTML=`<div class="activity-date">${formatDate(act.date)}</div>
-      <div class="activity-content">${act.content}</div>
-      <div class="activity-actions">
-        <button class="edit-activity-btn" data-id="${act.id}">Sửa</button>
-        <button class="delete-btn delete-activity-btn" data-id="${act.id}">Xóa</button>
-      </div>`;
-      list.appendChild(div);
-    });
-    addEvents(org);
-  });
-}
-function addEvents(org){
-  document.querySelectorAll(`#${org}-activities .edit-activity-btn`).forEach(b=>{
-    b.onclick=()=>editActivity(org,b.dataset.id);
-  });
-  document.querySelectorAll(`#${org}-activities .delete-activity-btn`).forEach(b=>{
-    b.onclick=()=>deleteActivity(org,b.dataset.id);
-  });
-}
-function saveActivity(org){
-  const date=document.getElementById(`${org}-date`).value;
-  const text=document.getElementById(`${org}-text`).value.trim();
-  if(!date||!text){alert("Nhập đủ thông tin");return;}
-  database.ref(`activities/${org}`).push({date,content:text,timestamp:firebase.database.ServerValue.TIMESTAMP}).then(()=>{
-    resetForm(org);   // ✅ Xoá rỗng form sau khi lưu
-    loadActivities(org);
-  });
-}
-function editActivity(org,id){
-  database.ref(`activities/${org}/${id}`).once('value').then(s=>{
-    const a=s.val();
-    document.getElementById(`${org}-date`).value=a.date;
-    document.getElementById(`${org}-text`).value=a.content;
-    document.getElementById(`${org}-save`).style.display='none';
-    document.getElementById(`${org}-edit`).style.display='inline-flex';
-    document.getElementById(`${org}-cancel`).style.display='inline-flex';
-    document.getElementById(`${org}-edit`).dataset.editId=id;
-  });
-}
-function updateActivity(org){
-  const id=document.getElementById(`${org}-edit`).dataset.editId;
-  const date=document.getElementById(`${org}-date`).value;
-  const text=document.getElementById(`${org}-text`).value.trim();
-  database.ref(`activities/${org}/${id}`).update({date,content:text,timestamp:firebase.database.ServerValue.TIMESTAMP}).then(()=>{
-    resetForm(org);loadActivities(org);
-  });
-}
-function deleteActivity(org,id){if(confirm("Xóa?"))database.ref(`activities/${org}/${id}`).remove().then(()=>loadActivities(org));}
-function resetForm(org){
-  document.getElementById(`${org}-date`).value='';
-  document.getElementById(`${org}-text`).value='';
-  document.getElementById(`${org}-save`).style.display='inline-flex';
-  document.getElementById(`${org}-edit`).style.display='none';
-  document.getElementById(`${org}-cancel`).style.display='none';
-}
-document.addEventListener("DOMContentLoaded",()=>{
-  const today=new Date().toISOString().split('T')[0];
-  document.querySelectorAll('input[type="date"]').forEach(i=>i.value=today);
-  loadActivities('mttq');
-});
-['mttq','doan','phunu','nguoicaotuoi'].forEach(org=>{
-  document.getElementById(`${org}-save`).onclick=()=>saveActivity(org);
-  document.getElementById(`${org}-edit`).onclick=()=>updateActivity(org);
-  document.getElementById(`${org}-cancel`).onclick=()=>resetForm(org);
-});
-</script>
+            const unitsToFetch = unit === 'all' ? TABS : [unit];
+            let allResults = [];
+            
+            const fetchPromises = unitsToFetch.map(unitId => 
+                database.ref(unitId).once('value').then(snapshot => ({unitId, data: snapshot.val()}))
+            );
+
+            try {
+                const snapshots = await Promise.all(fetchPromises);
+                snapshots.forEach(({unitId, data}) => {
+                    if (data) {
+                        Object.values(data).forEach(record => {
+                            if ((!startDate || record.date >= startDate) && (!endDate || record.date <= endDate)) {
+                                allResults.push({ unitName: UNIT_NAMES[unitId], ...record });
+                            }
+                        });
+                    }
+                });
+
+                allResults.sort((a, b) => new Date(b.date) - new Date(a.date));
+                filteredDataForExport = allResults;
+                renderSummaryTable(allResults);
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+                tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 40px;">Lỗi tải dữ liệu.</td></tr>`;
+            }
+        }
+        
+        function renderSummaryTable(results) {
+             const tableBody = document.querySelector('#summary-table tbody');
+             if (results.length === 0) {
+                 tableBody.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 40px;">Không tìm thấy kết quả phù hợp.</td></tr>`;
+                 return;
+             }
+             tableBody.innerHTML = results.map(item => `
+                <tr>
+                    <td>${item.unitName}</td>
+                    <td>${formatDate(item.date)}</td>
+                    <td>${item.content.replace(/\n/g, '<br>')}</td>
+                </tr>`).join('');
+        }
+        
+        function exportToExcel() {
+            if (filteredDataForExport.length === 0) return alert("Không có dữ liệu để xuất. Vui lòng lọc dữ liệu trước.");
+            
+            const dataToExport = filteredDataForExport.map(item => ({
+                'Đơn vị': item.unitName,
+                'Ngày tháng': formatDate(item.date),
+                'Nội dung': item.content
+            }));
+            
+            const ws = XLSX.utils.json_to_sheet(dataToExport);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "TongHopHoatDong");
+            ws['!cols'] = [ {wch:25}, {wch:15}, {wch:80} ];
+            XLSX.writeFile(wb, "BaoCaoHoatDong.xlsx");
+        }
+
+        // --- HÀM TIỆN ÍCH ---
+        function resetForm(tabId) {
+            document.getElementById(`date-${tabId}`).value = '';
+            document.getElementById(`content-${tabId}`).value = '';
+            document.getElementById(`editKey-${tabId}`).value = '';
+            const saveBtn = document.getElementById(`saveBtn-${tabId}`);
+            saveBtn.textContent = "Lưu Hoạt Động";
+            saveBtn.className = 'btn btn-save';
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '';
+            const [year, month, day] = dateString.split('-');
+            return `${day}/${month}/${year}`;
+        }
+
+        // --- KHỞI CHẠY KHI TẢI TRANG ---
+        document.addEventListener('DOMContentLoaded', () => {
+            TABS.forEach(tabId => {
+                document.getElementById(tabId).innerHTML = createTabContent(tabId);
+                loadData(tabId);
+            });
+            // Gán sự kiện cho bộ lọc ở tab tổng hợp
+            document.getElementById('search-unit').addEventListener('change', searchActivities);
+            document.getElementById('start-date').addEventListener('change', searchActivities);
+            document.getElementById('end-date').addEventListener('change', searchActivities);
+        });
+    </script>
 </body>
 </html>
